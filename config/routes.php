@@ -6,6 +6,8 @@
  * Time: 22:58
  */
 return array(
-    'news' => 'news/index',         // actionIndex in NewsController
-    'products' => 'product/list',   // actionList in ProductControllers
+    'news/([0-9]+)' => 'news/view/$1',
+    //'news/([0-9]+)' => 'news/view',     // actionView in NewsController
+    'news' => 'news/index',             // actionIndex in NewsController
+    //'products' => 'product/list',     // actionList in ProductControllers
 );

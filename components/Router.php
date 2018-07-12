@@ -10,44 +10,52 @@ class Router
 {
     private $routes;
 
-    public function __construct(){
-        $routesPath = ROOT.'/config/routes.php';
+    public function __construct()
+    {
+        $routesPath = ROOT . '/config/routes.php';
         $this->routes = include($routesPath);
     }
+
     /**
      * Returns request string
      * @return string
      */
-    private function getURI(){
-        if(!empty($_SERVER['REQUEST_URI'])){
+    private function getURI()
+    {
+        if (!empty($_SERVER['REQUEST_URI'])) {
             return trim($_SERVER['REQUEST_URI'], '/');
         }
     }
-    public function run(){
+
+    public function run()
+    {
         // Получаем строку запроса
         $uri = $this->getURI();
 
         // Проверить наличие такого элемента в routes.php
-        foreach ($this->routes as $uriPattern => $path){
+        foreach ($this->routes as $uriPattern => $path) {
             // Сравниваем $uriPattern и $uri
-            if(preg_match("~$uriPattern~", $uri)){
-                // Определить какой контроллер и экшен обрабатывают запрос
-                $segments = explode('/', $path);
-                // Извлекаем из массива $segments первый элемент, делаем первую букву результата заглавной
-                // и присваиваем переменной $controllerName
-                $controllerName = ucfirst(array_shift($segments)).'Controller';
-                // Извлекаем из массива $segments имя экшена
-                $actionName = 'action'.ucfirst(array_shift($segments));
-                // Записываем в переменную $controllerFile путь к полученному имени контроллера
-                $controllerFile = ROOT.'/controllers/'.$controllerName.'.php';
-                // Проверяем существует ли файл класса контроллера
-                if(file_exists($controllerFile)){
+            if (preg_match("~$uriPattern~", $uri)) {
+                // Получаем внутренний путь из внешнего согласно правилу
+                $internalRoute = preg_replace("~$uriPattern~", $path, $uri);
+                // Определить контроллер, экшен и параметры
+                // Разбиваем полученный URL и помещаем в массив
+                $segments = explode('/', $internalRoute);
+                // Извлекаем элементы из массива и записываем их в переменные
+                $controllerName = ucfirst(array_shift($segments)) . 'Controller';
+                $actionName = 'action' . ucfirst(array_shift($segments));
+                // Получаем оставшиеся элементы в качестве параметров
+                $parameters = $segments;
+                // Подключаем файл класса контроллера
+                $controllerFile = ROOT . '/controllers/' . $controllerName . '.php';
+                // Проверяем наличие файла и подключаем
+                if (file_exists($controllerFile)) {
                     include_once($controllerFile);
                 }
-                // Создать объект, вызвать метод (action)
+                // Создаем объект и вызываем его экшен
                 $controllerObject = new $controllerName;
-                $result = $controllerObject->$actionName();
-                if($result != null){
+                $result = call_user_func_array(array($controllerObject, $actionName), $parameters);
+                if ($result != null) {
                     break;
                 }
             }

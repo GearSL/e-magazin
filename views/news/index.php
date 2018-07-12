@@ -9,7 +9,11 @@
 </head>
 <body>
     <?php foreach ($newsList as $newsItem): ?>
-    <div class="item">12</div>
+        <a href="/news/<?php echo $newsItem['id'];?>"><?php echo $newsItem['title'];?></a>
+    <div class="item"><p><?php echo $newsItem['id'];?></p></div>
+    <div class="item"><p><?php echo $newsItem['title'];?></p></div>
+    <div class="item"><p><?php echo $newsItem['date'];?></p></div>
+    <div class="item"><p><?php echo $newsItem['short_content'];?></p></div>
     <?php endforeach;?>
 </body>
 </html>
